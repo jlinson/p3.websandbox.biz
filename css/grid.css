@@ -1,0 +1,23 @@
+/**
+ * CSS for Sudoku game grid.
+ *
+ */
+
+table.squares {
+    /* max-width: 600px; */
+    /* min-width: 400px; */
+    width: 500px;
+    border: groove 5px;
+}
+
+table.block {
+    width: 33%;
+    height: 33%;
+    border: solid;
+}
+
+td.cell,
+input.cell{
+    width: 33%;
+    height: 33%;
+}
