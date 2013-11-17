@@ -20,14 +20,14 @@ return array(
 
 	'modules'=>array(
 		// uncomment the following to enable the Gii tool
-		/*
+		/* */
 		'gii'=>array(
 			'class'=>'system.gii.GiiModule',
-			'password'=>'Enter Your Password Here',
+			'password'=>'P3Gpwd4jblxx',
 			// If removed, Gii defaults to localhost only. Edit carefully to taste.
 			'ipFilters'=>array('127.0.0.1','::1'),
 		),
-		*/
+		/* */
 	),
 
 	// application components
@@ -43,8 +43,8 @@ return array(
             'urlSuffix'=>'.html',
             'showScriptName'=>false,  // set to false to hide index.php
 			'rules'=>array(
-                '<page:\w+>' => 'site/<page>',                                      // successfully hides 'site'
-                '<controller:\w+>'=>'<controller>/list',
+                //'<page:\w+>' => 'site/<page>',                                    // successfully hides 'site' - comment out to access /gii
+                //'<controller:\w+>'=>'<controller>/list',                          // comment out to access /gii  (otherwise => cannot find '/gii/list'
                 '<controller:\w+>/<id:\d+>'=>'<controller>/view',                   // distribution config
                 '<controller:\w+>/<id:\d+>/<title>'=>'<controller>/view',
                 '<controller:\w+>/<action:\w+>/<id:\d+>'=>'<controller>/<action>',  // distribution config
@@ -52,19 +52,22 @@ return array(
 			),
 		),
 		/* */
+        // uncomment the following to use a SQLite database
+        /*
 		'db'=>array(
 			'connectionString' => 'sqlite:'.dirname(__FILE__).'/../data/testdrive.db',
 		),
+        */
 		// uncomment the following to use a MySQL database
-		/*
+		/* */
 		'db'=>array(
-			'connectionString' => 'mysql:host=localhost;dbname=testdrive',
+			'connectionString' => 'mysql:host=localhost;dbname=websandb_p3_websandbox_biz',
 			'emulatePrepare' => true,
-			'username' => 'root',
-			'password' => '',
+			'username' => 'websandb_p3',
+			'password' => 'DevPwd4p3',
 			'charset' => 'utf8',
 		),
-		*/
+		/* */
 		'errorHandler'=>array(
 			// use 'site/error' action to display errors
 			'errorAction'=>'site/error',
@@ -77,7 +80,7 @@ return array(
 					'levels'=>'error, warning',
 				),
 				// uncomment the following to show log messages on web pages
-				/*
+				/* TODO: if (YII_DEBUG) - how do you dynamically add to array
 				array(
 					'class'=>'CWebLogRoute',
 				),
