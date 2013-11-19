@@ -14,7 +14,7 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
         <?php for ($i=0; $i < 3; $i++): ?>
             <tr>
                 <?php for ($j=0; $j < 3; $j++): ?>
-                    <td>
+                    <td class="block">
                         <table class="block" id="b<?php echo (($i*3) + $j); ?>">
                             <?php for ($k=0; $k < 3; $k++): ?>
                                 <tr>

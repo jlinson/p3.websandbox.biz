@@ -1,6 +1,7 @@
 /**
  * CSS for Sudoku game grid.
- *
+ * - fixed size grid for development
+ * - TODO: experiment with responsive grid
  */
 
 table.squares {
@@ -8,16 +9,32 @@ table.squares {
     /* min-width: 400px; */
     width: 500px;
     border: groove 5px;
+    margin: 10;
+    padding: 0;
+    box-shadow: 10px 10px 5px #888888;
 }
 
-table.block {
-    width: 33%;
-    height: 33%;
-    border: solid;
+table.block,
+td.block {
+    border: solid 1px;
+    margin: 0;
+    padding: 0;
 }
 
 td.cell,
-input.cell{
-    width: 33%;
-    height: 33%;
+input.cell {
+    width: 51px;  /*33%;*/
+    height: 51px;
+    margin: 0;
+    text-align: center;
+    vertical-align: middle;
+    font: normal 18pt Comic Sans MS,Impact,Trebuchet MS,Tahoma, sans-serif;
+}
+
+td.cell {
+    padding: 0;
+}
+
+#tracker .cell {
+    border: inset 1px;
 }
