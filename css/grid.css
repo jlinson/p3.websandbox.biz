@@ -9,7 +9,7 @@ table.squares {
     /* min-width: 400px; */
     width: 500px;
     border: groove 5px;
-    margin: 10;
+    margin: 10px;
     padding: 0;
     box-shadow: 10px 10px 5px #888888;
 }
@@ -22,7 +22,7 @@ td.block {
 }
 
 td.cell,
-input.cell {
+td.cell input {
     width: 51px;  /*33%;*/
     height: 51px;
     margin: 0;
@@ -31,8 +31,21 @@ input.cell {
     font: normal 18pt Comic Sans MS,Impact,Trebuchet MS,Tahoma, sans-serif;
 }
 
+td.noinput {
+    border: solid 1px;
+}
+
 td.cell {
     padding: 0;
+}
+
+td.selected,
+td.selected input {
+    background-color: mintcream;
+    border-color: royalblue;
+}
+#tracker {
+    margin-left: 1%;
 }
 
 #tracker .cell {

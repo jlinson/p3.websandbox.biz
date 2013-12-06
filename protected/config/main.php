@@ -44,7 +44,7 @@ return array(
             'showScriptName'=>false,  // set to false to hide index.php
 			'rules'=>array(
                 //'<page:\w+>' => 'site/<page>',                                    // successfully hides 'site' - comment out to access /gii
-                //'<controller:\w+>'=>'<controller>/list',                          // comment out to access /gii  (otherwise => cannot find '/gii/list'
+                '<controller:\w+>'=>'<controller>/',                                // default action (TODO: necessary?)
                 '<controller:\w+>/<id:\d+>'=>'<controller>/view',                   // distribution config
                 '<controller:\w+>/<id:\d+>/<title>'=>'<controller>/view',
                 '<controller:\w+>/<action:\w+>/<id:\d+>'=>'<controller>/<action>',  // distribution config
@@ -52,6 +52,14 @@ return array(
 			),
 		),
 		/* */
+        // the following maps the jQuery coreScript assets to the Google CDN versions to use for this app - jlinson
+        'clientScript' => array(
+            'scriptMap' => array(
+                'jquery.js' => '//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js',
+                'jquery.min.js' => '//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js',
+                'jquery-ui.min.js' => '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js',
+            ),
+        ),
         // uncomment the following to use a SQLite database
         /*
 		'db'=>array(

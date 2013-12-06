@@ -1,4 +1,10 @@
-<?php /* @var $this Controller */ ?>
+<?php
+/* @var $this Controller */
+
+$cs = Yii::app()->clientScript;
+$cs->coreScriptPosition = CClientScript::POS_END;
+$cs->registerCoreScript('jquery');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +24,7 @@
     <!-- Twitter Bootstrap CSS framework -->
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap.css" media="screen, projection">
      */ ?>
-    <!-- Blueprint CSS framework  source: http://blueprintcss.org/ -->
+    <!-- Blueprint CSS framework  source: http://blueprintcss.org/  [Yii default css framework] -->
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/screen.css" media="screen, projection">
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/print.css" media="print">
 	<!--[if lt IE 8]>
@@ -27,7 +33,6 @@
 
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/main.css">
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/form.css">
-    <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/grid.css">
 
 	<title><?php echo CHtml::encode($this->pageTitle); ?></title>
 </head>

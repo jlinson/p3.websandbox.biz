@@ -1,6 +1,11 @@
 <?php
 /* @var $this SiteController */
 
+$cs=Yii::app()->clientScript;
+$baseUrl = Yii::app()->baseUrl;
+$cs->registerScriptFile($baseUrl.'/js/grid.js', CClientScript::POS_END);
+$cs->registerCssFile($baseUrl.'/css/grid.css');
+
 $this->pageTitle=Yii::app()->name;
 $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
 ?>
@@ -19,8 +24,8 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
                             <?php for ($k=0; $k < 3; $k++): ?>
                                 <tr>
                                     <?php for ($l=0; $l < 3; $l++): ?>
-                                        <td class="cell" id="c<?php echo (string) (($i*3)+$j) . (($k*3)+$l); ?>">
-                                            <input type="text" class="cell" name="c<?php echo (string) (($i*3)+$j) . (($k*3)+$l); ?>">
+                                        <td class="cell input" id="c<?php echo (string) (($i*3)+$j) . (($k*3)+$l); ?>">
+                                            <input type="text" maxlength="1" class="cell" name="c<?php echo (string) (($i*3)+$j) . (($k*3)+$l); ?>">
                                         </td>
                                     <?php endfor; ?>
                                 </tr>
@@ -38,7 +43,7 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
 <table id="tracker" class="squares">
     <tr>
         <?php for ($t=0; $t < 9; $t++): ?>
-            <td class="cell" id="t<?php echo ($t + 1); ?>"><?php echo ($t + 1); ?></td>
+            <td class="cell pickem" id="t<?php echo ($t + 1); ?>"><?php echo ($t + 1); ?></td>
         <?php endfor; ?>
     </tr>
 </table>
@@ -47,3 +52,4 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
 the <a href="http://www.yiiframework.com/doc/">documentation</a>.
 Feel free to ask in the <a href="http://www.yiiframework.com/forum/">forum</a>,
 should you have any questions.</p>
+
