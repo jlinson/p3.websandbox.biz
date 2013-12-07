@@ -22,7 +22,7 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
                         <?php for ($k=0; $k < 3; $k++): ?>
                             <?php for ($l=0; $l < 3; $l++): ?>
                                 <div class="cell input" id="c<?php echo (string) (($i*3)+$j) . (($k*3)+$l); ?>">
-                                    <input type="text" maxlength="1" class="cell" name="c<?php echo (string) (($i*3)+$j) . (($k*3)+$l); ?>">
+                                    <input type="text" maxlength="1" class="input-cell" name="c<?php echo (string) (($i*3)+$j) . (($k*3)+$l); ?>">
                                 </div>
                             <?php endfor; ?>
                         <?php endfor; ?>
@@ -41,19 +41,6 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
         <?php for ($t=0; $t < 9; $t++): ?>
             <div class="cell pickem" id="t<?php echo ($t + 1); ?>"><?php echo ($t + 1); ?></div>
         <?php endfor; ?>
-    </div>
-</div>
-<div id="sidebar">
-    <div id="instructions">
-
-    </div>
-    <div id="Preferences">
-
-        <p>For more details on how to further develop this application, please read
-            the <a href="http://www.yiiframework.com/doc/">documentation</a>.
-            Feel free to ask in the <a href="http://www.yiiframework.com/forum/">forum</a>,
-            should you have any questions.</p>
-
     </div>
 </div>
 <div id="game-btns">
@@ -78,4 +65,17 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
     <!-- <button name="hint" type="button">Hint</button> -->
     <hr>
     <button name="print" type="button">Print</button>
+</div>
+<div id="sidebar">
+    <div id="instructions">
+
+    </div>
+    <div id="Preferences">
+
+        <p>For more details on how to further develop this application, please read
+            the <a href="http://www.yiiframework.com/doc/">documentation</a>.
+            Feel free to ask in the <a href="http://www.yiiframework.com/forum/">forum</a>,
+            should you have any questions.</p>
+
+    </div>
 </div>

@@ -29,8 +29,10 @@ hr {
     float: left;
 }
 
+/* Need this to avoid conflict with regular <input> styles.
+ * - specificity to override regular <input> styles requires fully qualified name.    */
 div.cell,
-input.cell {
+input.input-cell {
     margin: 0;
     text-align: center;
     vertical-align: middle;
@@ -43,19 +45,19 @@ div.cell {
 }
 
 /* Need this to avoid conflict with regular <input> styles.
- * - can be specified as '.cell input' or 'input.cell'    */
-input.cell {
+ * - specificity to override regular <input> styles requires fully qualified name.    */
+input.input-cell {
     width: 98%;
     height: 98%;
     padding: 0;
 }
 
-/* .cells with an nested <input> need this - */
+/* div.cells with an nested <input> need this - */
 .input {
     padding: 0;  /* no effect? */
 }
 
-/* .cells with no nested <input> need this - */
+/* div.cells with no nested <input> need this - */
 .noinput,
 .pickem {
     padding-top: 6px;
@@ -76,7 +78,7 @@ input.cell {
 }
 
 /* Need to distinguish #grid div.cell from #tracker div.cell to allow % sizing
- * - #grid div.cell is nested in .block            
+ * - #grid div.cell is nested in .block
  * - .cell.input is required because <input> is class .cell      */
 #grid .cell.input {
     width: 32%;  /* approx. 51px*/
