@@ -4,28 +4,41 @@
  *
  * Date: 2013-11-18
  *
- * TODO: Try the js.ValidationEngine
+ * TODO: eliminate experimental js
+ * TODO: eliminate console.log() [grep files]
+ * TODO: try the js.ValidationEngine
  */
 
+// **************************************************************************************************
 // Common functions:
-/***********************************************************
+/****************************************************************************************************
  * setSelected() - sets selected cell class
  * - requires .css to style td.selected
  * @param pickId
  */
-function setSelected( pickId )
-{
+function setSelected( pickId ) {
+
     if (typeof pickId !== 'undefined' && pickId !== null) {
         var num = pickId.substr(1,1);
-        if ($("td[class$='selected']").hasClass("noinput")) {
-            $("td[class$='selected']").text(num);
+        if ($(".selected").hasClass("noinput")) {
+            $(".selected").text(num);
         } else {
-            $("td[class$='selected'] > input").val(num);
+            $(".selected > input").val(num);
         }
     }
 }
 
+/**************************************************************************************************
+ * This event required to ensure square #game #grid in the event of dynamic #page resizing
+ */
+$( document ).ready( function() {
 
+    var gw = $('#grid').width();
+    $('#grid').css({'height': gw + 'px' });
+    console.log( '#grid width: ' + gw );
+});
+
+// **************************************************************************************************
 // Event listeners:
 /****************************************************************************************************
  * "input" class listener - used to limit inputs to integers 1 through 9
@@ -43,8 +56,8 @@ $("input").keypress(function (e)
 // - NEED old and new values to keep event from logging new value just pressing keys with no change!!!
 var old_value = "";
 var new_value = "";
-$( "input" ).keyup(function()
-{
+$( "input" ).keyup( function() {
+
     var new_value = $( this ).val();
 	if (old_value != new_value) {
 		console.log( $(this).parent().attr("id") + ": " + "old:" + old_value + " new:" + new_value);
@@ -54,28 +67,23 @@ $( "input" ).keyup(function()
 });
 // - change only fires when the input loses focus (by tab or click)
 // - but, this does only fire on changes
-$( "input" ).change(function()
-{
+$( "input" ).change( function() {
+
     var value = $( this ).val();
     console.log(value);
 });
 
-/*************************************************************************************
- * TODO: Eliminate experimental js
- * - eliminate console.log() [grep files]
- */
-
 // NOTE: blur fires after on.focusout!!!
+$("input").on('focusout', function () {
 
-$("input").on('focusout',function ()
-{
     old_value = "";
     new_value = "";
 	console.log( "on.focusout: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + old_value + " new:" + new_value );
 });
 // Tabbing automatically "selects" - this code enforces same for click-to-cell -
-$("input[type=text], input[type=password], textarea").on('focusin',function ()
-{
+//$("input[type=text], input[type=password], textarea").on('focusin',function ()
+$("input").on('focusin', function () {
+
     this.select();
     old_value = $(this).val();
 	console.log( "on.focusin: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + old_value + " new:" + new_value );
@@ -83,25 +91,33 @@ $("input[type=text], input[type=password], textarea").on('focusin',function ()
 
 // Note this: http://stackoverflow.com/questions/2176861/javascript-get-clipboard-data-on-paste-event-cross-browser
 
-$("button[name=form-input]").click( function()
+// **************************************************************************************************
+// Click listeners -
+
+$("button[name=undo]").click( function()
 {
-    $("#form-input").toggle();
+    //$("#form-input").toggle();
 });
-$("button[name=no-input]").click( function()
+$("button[name=note]").click( function()
 {
     $("#no-input").toggle();
+});
+$("button[name=erase]").click( function()
+{
+    // just pass an empty tracker id to setSelected -
+    setSelected('t');
 });
 /****************************************************************************************************
  * "selected" and "pickem" class click listener -
  *  - used to provide mouse-click or touch-screen play by selecting a cell, then selecting a number on bottom.
  *  - eliminate <input type="text"> and use "noinput" class to toggle into this mode exclusively.
  */
-$("td[class^='cell']").click( function()
+$(".cell").click( function()
 {
     if ($(this).hasClass("selected")) {
         $(this).removeClass( "selected" );
     } else if ($(this).hasClass("input") || $(this).hasClass("noinput")) {
-        $("td[class$='selected']").removeClass( "selected");
+        $(".selected").removeClass( "selected");
         $(this).addClass('selected');
     } else if ($(this).hasClass("pickem")) {
         var id = $(this).attr("id");
@@ -109,4 +125,3 @@ $("td[class^='cell']").click( function()
     }
     console.log( "Cell clicked: " + $(this).attr("id"));
 });
-
