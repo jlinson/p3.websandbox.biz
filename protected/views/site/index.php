@@ -3,8 +3,12 @@
 
 $cs=Yii::app()->clientScript;
 $baseUrl = Yii::app()->baseUrl;
-$cs->registerScriptFile($baseUrl.'/js/grid.js', CClientScript::POS_END);
-$cs->registerCssFile($baseUrl.'/css/grid.css');
+$cs->registerCoreScript('jquery.ui');
+$cs->registerScriptFile($baseUrl . '/js/grid.js', CClientScript::POS_END);
+$cs->registerScriptFile($baseUrl . '/js/game.js', CClientScript::POS_END);
+$cs->registerScript('juiAccordian','$("#sidebar").accordion();', CClientScript::POS_READY);
+$cs->registerCssFile($cs->getCoreScriptUrl() . '/jui/css/base/jquery-ui.css');
+$cs->registerCssFile($baseUrl . '/css/grid.css');
 
 $this->pageTitle=Yii::app()->name;
 $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
@@ -32,8 +36,8 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
         </div>
     </form>
     <div id="grid-btns">
-        <button name="undo" type="button">Undo &#8634;</button>
-        <!-- <button name="redo" type="button">Redo &#10227;</button> -->
+        <button name="undo" type="button" disabled>Undo &#8634;</button>
+        <!-- <button name="redo" type="button" disabled>Redo &#10227;</button> -->
         <button name="note" type="button">Note &#9997;</button>
         <button name="erase" type="button">Erase &#10008;</button>
     </div>
@@ -54,6 +58,7 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
     <button name="load" type="button">New Game</button>
     <button name="reset" type="button">Reset</button>
     <button name="play" type="button">Play</button>
+    <strong>Difficulty Level:</strong>
     <select name="level" size="1">
         <option value="0">Beginner</option>
         <option value="1">Easy</option>
@@ -67,15 +72,31 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
     <button name="print" type="button">Print</button>
 </div>
 <div id="sidebar">
-    <div id="instructions">
-
+    <h3>Instructions</h3>
+    <div>
+        <h5>Game Rules:</h5>
+        <p>Solve the Su Doku puzzle by entering a number from 1 to 9 in the empty cells. Each number can only
+        appear once in a row, once in a column and once in each 3x3 grid. </p>
+        <h5>Sudo Sudoku Instructions:</h5>
+        <p>To start a game, click 'New Game'. You can select the game difficulty from the 'Difficulty Level'
+        drop-down. On large screens, both keyboard and mouse/touch entry works. Click on a cell, then type a
+        number, or select a number from the number bar below the grid. You can turn off keyboard input in the
+        Preferences section.</p>
     </div>
-    <div id="Preferences">
-
+    <h3>Preferences</h3>
+    <div>
+        <p>Some preferences</p>
+    </div>
+    <h3>Additional Information</h3>
+    <div>
+        <p>See the Preferences section for additional game settings.</p>
+        <p>Click the About option in the top menu to learn more about this program.</p>
+    </div>
+    <h3>Yii Framework Info</h3>
+    <div>
         <p>For more details on how to further develop this application, please read
-            the <a href="http://www.yiiframework.com/doc/">documentation</a>.
-            Feel free to ask in the <a href="http://www.yiiframework.com/forum/">forum</a>,
-            should you have any questions.</p>
-
+        the <a href="http://www.yiiframework.com/doc/">documentation</a>.
+        Feel free to ask in the <a href="http://www.yiiframework.com/forum/">forum</a>,
+        should you have any questions.</p>
     </div>
 </div>

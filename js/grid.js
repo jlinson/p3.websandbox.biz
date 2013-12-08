@@ -9,11 +9,10 @@
  * TODO: try the js.ValidationEngine
  */
 
-var undoStack = [];
 // **************************************************************************************************
 // Common functions:
 /****************************************************************************************************
- * setSelected() - sets a div.cell.pickem number (from #Tracker) into the 'selected' grid div.cell
+ * setSelected() - sets a number (from #Tracker [t], Undo [u] or Erase [e]) into the 'selected' grid div.cell
  * - coordinate with the .cell 'click' and on('focusin') listeners below
  * - example of jQuery result caching and child '>' selector.
  * @param pickId
@@ -21,33 +20,77 @@ var undoStack = [];
 function setSelected( pickId ) {
 
     if (typeof pickId !== 'undefined' && pickId !== null) {
+        var caller = pickId.substr(0,1)
         var num = pickId.substr(1,1);
-        var selected = $('.selected');
-        if (selected.hasClass("noinput")) {
-            undoPush( selected.attr("id"), selected.text() );
-            selected.text(num);
+        var selected = getSelected();
+        if (caller != "u") {
+            // ignore the undo - don't undo the undo; push all others
+            undoPush( selected[3], selected[0] );
+        }
+        if (selected[1] == "noinput") {
+            selected[2].text(num);
         } else {
-            var inputSelected = $('.selected > input');
-            undoPush( selected.attr("id"), inputSelected.val());
-            inputSelected.val(num);
-            inputSelected.focus();
+            selected[2].val(num);
+            selected[2].focus();
         }
    }
 }
 
+/****************************************************************************************************
+ * getSelected() - gets the value from the 'selected' grid div.cell
+ * - this is only necessary to handle the different methods of getting an "input" value vs. "noinput" value.
+ * - this also passes back the jQuery selector based on "input" vs "noinput".
+ */
+function getSelected() {
+
+    var jquerySelected =$('.selected');
+    var selected = [];
+    if (jquerySelected.hasClass("noinput")) {
+        selected = [jquerySelected.text(), "noinput", jquerySelected, jquerySelected.attr("id")];
+    } else {
+        var inputSelected = $('> input', jquerySelected);
+        selected = [inputSelected.val(), "input", inputSelected, jquerySelected.attr("id")];
+    }
+    return selected;
+}
+
+var undoStack = [];
+/********************************************************************************************
+ * undoPush() concatenates the cellId and value and controls the Undo button
+ * @param cellId
+ * @param value
+ */
 function undoPush( cellId, value) {
 
+    if (!cellId) {
+        // trap invalid call
+        return;
+    }
     if (!value) {
         value = '';
     }
-    undoStack.push(cellId + ':' + value);
-
+    var i = undoStack.push(cellId + ':' + value);
+    $("button[name=undo]").removeAttr("disabled");
+    console.log("undoPush: i:" + i + " cellId:" + cellId + " value:" + value);
 }
 
+/********************************************************************************************
+ * undoPop() returns the last cellId and value in array and controls the Undo button
+ * - since undoPush 'strings' the input, undoPop 'unstrings' the output.
+ */
 function undoPop() {
 
-    var i = undoStack.pop();
-    console.log( i );
+    var lastDo = [];
+    if (undoStack.length > 0) {
+        // check if this is last item and return the pop();
+        if (undoStack.length == 1) {
+            $("button[name=undo]").attr("disabled", "disabled");
+        }
+        var i = undoStack.pop();
+        lastDo = i.split(":");
+    }
+    console.log("undoPop: cellId:" + lastDo[0] + " value:" + lastDo[1] );
+    return lastDo;
 }
 
 function evalInput() {
@@ -98,16 +141,16 @@ $("input").keypress(function (e) {
 // using keyup - this fires and logs value even when value doesn't change
 // - $(this).val() - only get PRIOR value, and only if highlighted and changed (blanked and re-type yields blank)
 // - NEED old and new values to keep event from logging new value just pressing keys with no change!!!
+// - also keyup fires even when toggling away from window (i.e. any keyup will fire this while input has focus).
 var old_value = "";
 var new_value = "";
 $( "input" ).keyup( function(e) {
 
-
-    var new_value = $(this).val();
+    new_value = $(this).val();
 	if (old_value != new_value) {
-		console.log( $(this).parent().attr("id") + ": " + "old:" + old_value + " new:" + new_value);
+		console.log( "on.keyup: " + $(this).parent().attr("id") + ": " + "old:" + old_value + " new:" + new_value);
 		undoPush($(this).parent().attr("id"), old_value);
-//	old_value = new_value;
+	    old_value = new_value;
 	}
 });
 // - change only fires when the input loses focus (by tab or click)
@@ -115,14 +158,16 @@ $( "input" ).keyup( function(e) {
 $( "input" ).change( function() {
 
     var value = $( this ).val();
-    console.log(value);
+    console.log( "on.change: " + value);
 });
 
 // NOTE: blur fires after on.focusout!!!
+// - warning: on.focusout fires event when a button is clicked, even though "selected" cell unchanged.
+// - just toggling window will cause focusout (and keyup) to fire - tie old_value / new_value resets to on.focusin
 $("input").on('focusout', function () {
 
-    old_value = "";
-    new_value = "";
+    //old_value = "";
+    //new_value = "";
 	console.log( "on.focusout: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + old_value + " new:" + new_value );
 });
 
@@ -138,9 +183,16 @@ $('.cell').on('focusin', function() {
         // do nothing
     } else {
         // clear any other "selected" and add to tabbed-in
+        if ($(this).hasClass("input")) {
+            old_value = $("> input", this).val();
+        } else {
+            old_value = $(this).text();
+        }
+        new_value = "";
         $(".selected").removeClass( "selected");
         $(this).addClass('selected');
     }
+    console.log( "on.focusin: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + old_value + " new:" + new_value );
 });
 
 /****************************************************************************************************
@@ -167,6 +219,7 @@ $(".cell").click( function() {
             $(this).addClass('selected');
         }
     } else if ($(this).hasClass("pickem")) {
+        // pickem id's all start with "t" == "tracker"
         var id = $(this).attr("id");
         setSelected(id);
     }
@@ -178,7 +231,23 @@ $(".cell").click( function() {
 
 $("button[name=undo]").click( function() {
 
-    undoPop();
+    var lastChange = undoPop();
+    if (lastChange.length == 0) {
+        // message the user - but Undo button should have been disabled by undoPop()
+        alert("Nothing to Undo");
+    } else {
+        // undo last number entry - note: not necessarily the last keystroke (e.g. doesn't undo 'tab', et.)
+        var lastChangeId = $("#" + lastChange[0]);
+        if (lastChangeId.hasClass("selected")) {
+            // just call the setSelected()
+        } else {
+            // clear any other "selected" and add to cell to undo
+            $(".selected").removeClass( "selected");
+            lastChangeId.addClass('selected');
+        }
+        // flag the undo caller with prefix "u" -
+        setSelected('u' + lastChange[1]);
+    }
 });
 
 $("button[name=note]").click( function() {
@@ -188,7 +257,11 @@ $("button[name=note]").click( function() {
 
 $("button[name=erase]").click( function()
 {
-    // just pass an empty tracker id to setSelected -
-    setSelected('t');
+    // just pass a single char to setSelected - "e" indicates "erase" called it -
+    // - don't bother erasing an empty cell (TODO: Erase is not 'disabled')
+    var selected = getSelected();
+    if (selected[0]) {
+        setSelected('e');
+    }
 });
 

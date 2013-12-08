@@ -129,6 +129,8 @@ input.input-cell {
 
 /* #game, #game-btns & #sidebar comprise entire #page width  */
 #sidebar {
-    width: 200px;
+    width: 230px;
     float: right;
+    font-size: 10pt;
+    padding: 0px 20px 0px 0px;
 }
