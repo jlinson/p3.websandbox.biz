@@ -16,7 +16,7 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
 
 <h1>Welcome to <i><?php echo CHtml::encode($headerName); ?></i></h1>
 
-<p></p>
+<p id="game-caption"></p>
 <div id="game">
     <form name="game" method="post" action="index.php">
         <div id="grid" class="block-wrapper">
@@ -49,10 +49,8 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
 </div>
 <div id="game-btns">
     <div id="timers">
-        Elapsed Time:
+        <strong>Elapsed Time:</strong>
         <div id="elapsed-time">0:00</div>
-        Best Time:
-        <div id="best-time">0:00</div>
     </div>
     <hr>
     <button name="load" type="button">New Game</button>

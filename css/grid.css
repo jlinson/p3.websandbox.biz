@@ -50,6 +50,7 @@ input.input-cell {
     width: 98%;
     height: 98%;
     padding: 0;
+    color: inherit;  /* TODO: is this default? */
 }
 
 /* div.cells with an nested <input> need this - */
@@ -68,6 +69,10 @@ input.input-cell {
 .selected input {
     background-color: mintcream;
     border-color: royalblue;
+}
+
+.current {
+    color: royalblue ;
 }
 
 /* #game, #game-btns & #sidebar comprise entire #page width  */
@@ -127,10 +132,15 @@ input.input-cell {
     margin-bottom: 5px;
 }
 
+#timers {
+    text-align: center;
+}
+
 /* #game, #game-btns & #sidebar comprise entire #page width  */
+/* - sidebar needs to mesh with main.css and jui.accordian.css */
 #sidebar {
     width: 230px;
     float: right;
     font-size: 10pt;
-    padding: 0px 20px 0px 0px;
+    padding: 0 20px 0 0;
 }
