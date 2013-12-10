@@ -44,13 +44,12 @@ div.cell {
     border: solid 1px;
 }
 
-/* Need this to avoid conflict with regular <input> styles.
+/* Need this to avoid conflict with regular <input> styles in screen.css
  * - specificity to override regular <input> styles requires fully qualified name.    */
 input.input-cell {
     width: 98%;
     height: 98%;
     padding: 0;
-    color: inherit;  /* TODO: is this default? */
 }
 
 /* div.cells with an nested <input> need this - */
@@ -71,8 +70,16 @@ input.input-cell {
     border-color: royalblue;
 }
 
-.current {
+/* input.current required to override <input> styles in screen.css */
+.current,
+input.current {
     color: royalblue ;
+}
+
+/* input.current required to override <input> styles in screen.css */
+.invalid,
+input.invalid {
+    color: red;
 }
 
 /* #game, #game-btns & #sidebar comprise entire #page width  */

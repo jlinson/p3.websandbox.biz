@@ -10,12 +10,14 @@
  * .pickem - div.cell with numbers to be clicked/touched to input into grid div.cells
  * .selected - single cell that has grid focus (not necessarily same as browser / OS focus)
  * .current - all cells with numbers matching the .selected number get this tag
- * .valid - all cells with numbers that pass input evaluation
+ * .valid - all cells with numbers that pass input evaluation  (all .readonly values start as .valid)
  * .invalid - all cells with numbers that fail input evaluation
  * .readonly - all cells with values set programmatically by the initial game grid load
  *           (.readonly added as class to div.cell and as html attribute to <input>s if present)
  *
- * Note: All entries must be .valid, .invalid or .readonly.  They may also be .selected and .current.
+ * Note: All entries must be .valid or .invalid (or blank cell / neither class == no entry).
+ *       Cells may also be .selected, .current and .readonly.
+ *       Game is won when all 81 cells are .valid!
  *
  * Ids required by this js:
  * #c00 - for all 'c'ells where first number indicates the 0 indexed 3x3 block
@@ -132,6 +134,8 @@ function undoPop() {
  * - relies on css to style the numbers to hilite (or not, depending on user preference) all matching numbers.
  * - this does not flag errors; that is done by evalInput after all matching numbers are tagged.
  * @param selected - array - see getSelected()  [note: setSelected appends new value to array.]
+ *   [0] == oldValue  [1] == input class  [2] == jQuery reference  [3] == attr("id")  [4] == newValue
+ *   - only [0] and [1] are required for this f(n); depends on caller.
  */
 function tagCurrent( selected ) {
 
@@ -141,12 +145,16 @@ function tagCurrent( selected ) {
         num = selected[4];
     }
     $(".current").removeClass("current");
-    $(".cell:contains('" + num + "')").addClass("current");
-    if (selected[1] == "input") {
-        $("input:contains('" + num + "')").addClass("current");
+    // Only re-tag 'current' for non-blank numbers (click can toggle-off selected in noinput mode).
+    if (num) {
+        $(".cell:contains('" + num + "')").addClass("current"); // works for .cell, but NOT for <input>
+        if (selected[1] == "input") {
+            // input value (property, not attribute) needs to be selected this way -
+            $("input").filter(function() {
+                return this.value == num;
+            }).addClass("current");
+        }
     }
-    console.log("selected num:" + num + " input?:" + selected[1]);
-
 }
 
 /********************************************************************************************
@@ -155,13 +163,108 @@ function tagCurrent( selected ) {
  * - must re-evaluate .invalid numbers to see if changes or erasers have eliminated conflicts.
  * - relies on css to style the numbers in conflict.
  * @param selected - array - see getSelected()  [note: setSelected appends new value to array.]
+ *   [0] == oldValue  [1] == input class  [2] == jQuery reference  [3] == attr("id")  [4] == newValue
+ *   - called from methods changing the cell value, so all array elements are required for this f(n).
  */
-function evalInput(selected) {
+function evalInput( selected ) {
 
-    //.addClass( "valid")
-    //.addClass( "invalid")
+    var blockMatchCnt = 0;
+    var blockMatchCntOld = 0;
+    var rowMatchCnt = 0;
+    var rowMatchCntOld = 0;
+    var colMatchCnt = 0;
+    var colMatchCntOld = 0;
+    var invalidFlag = 0;
+    var validCnt = 0;
 
+    var itemClass = $("#" + selected[3]).attr("class");
+
+    /* newValue validation  followed by  oldValue validation */
+    // Validate the number within the .block (check within block ID) -
+    var blockId = "#b" + selected[3].substr(1,1);
+    blockMatchCnt = validateCell( selected[1], blockId, selected[4], 1, invalidFlag );
+    blockMatchCntOld = validateCell( selected[1], blockId, selected[0], 0, 0 );
+    if (blockMatchCnt > 1) {
+        invalidFlag ++;
+    }
+
+    // Validate the number within the row -
+    var rowSelector = "." + itemClass.substr( itemClass.indexOf("row"), 4 );
+    rowMatchCnt = validateCell( selected[1], rowSelector, selected[4], 1, invalidFlag );
+    rowMatchCntOld = validateCell( selected[1], rowSelector, selected[0], 0, 0 );
+    if (rowMatchCnt > 1) {
+        invalidFlag ++;
+    }
+
+    // Validate the number within the column -
+    var colSelector = "." + itemClass.substr( itemClass.indexOf("col"), 4 );
+    colMatchCnt = validateCell( selected[1], colSelector, selected[4], 1, invalidFlag );
+    colMatchCntOld = validateCell( selected[1], colSelector, selected[0], 0, 0 );
+    if (colMatchCnt > 1) {
+        invalidFlag ++;
+    }
+
+    console.log("evalInput: " + rowSelector + ":" + colSelector + " blockMatchCnt:" + blockMatchCnt + " rowMatchCnt:" + rowMatchCnt + " colMatchCnt:" + colMatchCnt + " invalidFlag" + invalidFlag + " validCnt:" + validCnt);
 }
+
+/********************************************************************************************
+ * validateCell() - called by evalInput() to check for cell matches and flag conflicts
+ * - only looks at a block, a row or a column per call (based on jQuery selector passed.
+ * @param inputClass  - either "input" or "noinput"
+ * @param selector  - jQuery selector for block, row or column
+ * @param numValue  - number to check for conflicts
+ * @param newFlag   - indicates whether numValue is new vs. old (removed) entry  (both need to be checked)
+ *                  - don't reset the selected cell based on the old value, only based on new value.
+ * @param invalidFlg - indicates whether 'selected' cell has already failed a block, row or column test
+ *                  - otherwise, cell may fail a block test, but pass a row or column test; one invalid = 'invalid'
+ * @return matchCnt  - number of matching numbers; 1 == .valid and >1 == .invalid (i.e. conflict)
+ */
+function validateCell( inputClass, selector, numValue, newFlag, invalidFlg ) {
+
+    var matchCnt = 0;
+
+    if (inputClass == "input") {
+        // default keyboard input mode -
+
+        if (numValue) {
+            // only check matches if non-zero, non-blank, not undefined numValue
+            matchCnt = $(":input", selector).filter(function() {
+                return this.value == numValue;
+            }).length;
+        }
+
+        if (matchCnt > 1) {
+            $(":input", selector).filter(function() {
+                return this.value == numValue;
+            }).removeClass("valid").addClass("invalid");
+        } else if (matchCnt == 0 && newFlag != 0) {
+            // blank cells are neither valid or invalid -
+            $(":input", selector).removeClass("valid invalid");
+        } else if (!invalidFlg) {
+            // no block, row or column conflicts => valid entry
+            $(":input", selector).filter(function() {
+                return this.value == numValue;
+            }).removeClass("invalid").addClass("valid");
+        }
+
+    } else {
+        // user-selected (or device-limitation-selected) "noinput" mode -
+
+        matchCnt = $(selector + ":contains('" + numValue + "')").length;
+
+        if (matchCnt > 1) {
+            $(selector + ":contains('" + numValue + "')").removeClass("valid").addClass("invalid");
+        } else if (matchCnt == 0) {
+            // blank cells are neither valid or invalid -
+            $(selector).removeClass("valid invalid");
+        } else {
+            $(selector + ":contains('" + numValue + "')").removeClass("invalid").addClass("valid");
+        }
+    }
+
+    return matchCnt;
+}
+
 
 // **************************************************************************************************
 // Event listeners:
@@ -178,8 +281,9 @@ function evalInput(selected) {
 // - $(this).val() - only get PRIOR value, and only if highlighted and changed (blanked and re-type yields blank)
 // - NEED old and new values to keep event from logging new value just pressing keys with no change!!!
 // - also keyup fires even when toggling away from window (i.e. any keyup will fire this while input has focus).
-var old_value = "";
-var new_value = "";
+var oldValue = "";
+var newValue = "";
+var selectInfo = [];
 $( "input" ).on({
     "keypress": function (e) {
 
@@ -194,17 +298,26 @@ $( "input" ).on({
         }
     },
     "keyup": function(e) {
-        new_value = $(this).val();
-        if (old_value != new_value) {
-            console.log( "on.keyup: " + $(this).parent().attr("id") + ": " + "old:" + old_value + " new:" + new_value);
-            undoPush($(this).parent().attr("id"), old_value);
-            old_value = new_value;
+
+        newValue = $(this).val();
+        if (oldValue != newValue) {
+
+            //Push the 'undo' info onto the undo stack -
+            undoPush($(this).parent().attr("id"), oldValue);
+
+            //Tag the new number entry (similar to setSelected called by .pickem click) -
+            selectInfo = [oldValue, "input", $(this), $(this).parent().attr("id"), newValue];
+            tagCurrent( selectInfo );
+            evalInput( selectInfo );
+
+            //Finally, recognize that newValue is the new oldValue -
+            oldValue = newValue;
         }
     },
     "focusout": function() {
-        //old_value = "";
-        //new_value = "";
-        console.log( "on.focusout: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + old_value + " new:" + new_value );
+        //oldValue = "";
+        //newValue = "";
+        console.log( "on.focusout: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + oldValue + " new:" + newValue );
     },
     "change": function() {
 
@@ -217,7 +330,7 @@ $( "input" ).on({
 
 // NOTE: blur fires after on.focusout!!!
 // - warning: on.focusout fires event when a button is clicked, even though "selected" cell unchanged.
-// - just toggling window will cause focusout (and keyup) to fire - tie old_value / new_value resets to on.focusin
+// - just toggling window will cause focusout (and keyup) to fire - tie oldValue / newValue resets to on.focusin
 
 /****************************************************************************************************
  * div.cell.input class 'focusin' listener -
@@ -227,20 +340,26 @@ $( "input" ).on({
  */
 $('.cell').on('focusin', function() {
 
+    var htmlClass = '';
     if ($(this).hasClass("selected")) {
         // do nothing
     } else {
         // clear any other "selected" and add to tabbed-in
         if ($(this).hasClass("input")) {
-            old_value = $("> input", this).val();
+            htmlClass = "input";
+            oldValue = $("> input", this).val();
+
         } else {
-            old_value = $(this).text();
+            htmlClass = "noinput";
+            oldValue = $(this).text();
         }
-        new_value = "";
+        newValue = "";
         $(".selected").removeClass("selected");
         $(this).addClass('selected');
+        selectInfo = [oldValue, htmlClass];
+        tagCurrent( selectInfo );
     }
-    console.log( "on.focusin: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + old_value + " new:" + new_value );
+    console.log( "on.focusin: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + oldValue + " new:" + newValue );
 });
 
 /****************************************************************************************************
@@ -252,20 +371,28 @@ $('.cell').on('focusin', function() {
  */
 $(".cell").click( function() {
 
+    var htmlClass = '';
     if ($(this).hasClass("input")) {
         // select cell contents (like tab), then let 'focusin' handle the rest
         // - don't toggle "selected" if keyboard focus is there.
         // - REMEMBER THIS: syntax below provides click-in select, same as tabbing into input.
         $("> input", this).select();
+
     } else if ($(this).hasClass("noinput")) {
+        htmlClass = "noinput";
         if ($(this).hasClass("selected")) {
             // toggle off the selection
             $(this).removeClass("selected");
+            oldValue = '';
         } else {
             // clear any other "selected" and add to clicked
             $(".selected").removeClass("selected");
             $(this).addClass('selected');
+            oldValue = $(this).text();
         }
+        selectInfo = [oldValue, htmlClass];
+        tagCurrent( selectInfo );
+
     } else if ($(this).hasClass("pickem")) {
         // pickem id's all start with "t" == "tracker"
         var id = $(this).attr("id");
@@ -290,7 +417,7 @@ $("button[name=undo]").click( function() {
             // just call the setSelected()
         } else {
             // clear any other "selected" and add to cell to undo
-            $(".selected").removeClass( "selected");
+            $(".selected").removeClass("selected");
             lastChangeId.addClass('selected');
         }
         // flag the undo caller with prefix "u" -

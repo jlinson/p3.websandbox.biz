@@ -25,7 +25,7 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
                     <div class="block" id="b<?php echo (($i*3) + $j); ?>">
                         <?php for ($k=0; $k < 3; $k++): ?>
                             <?php for ($l=0; $l < 3; $l++): ?>
-                                <div class="cell input" id="c<?php echo (string) (($i*3)+$j) . (($k*3)+$l); ?>">
+                                <div class="cell input row<?php echo (string) (($i*3)+($k+1)); ?> col<?php echo (string) (($j*3)+($l+1)); ?>" id="c<?php echo (string) (($i*3)+$j) . (($k*3)+$l); ?>">
                                     <input type="text" maxlength="1" class="input-cell" name="c<?php echo (string) (($i*3)+$j) . (($k*3)+$l); ?>">
                                 </div>
                             <?php endfor; ?>
