@@ -18,7 +18,7 @@
 // Button click listeners -
 
 $("button[name=load]").click( function() {
-
+    gameLoad();
 
 });
 
@@ -48,21 +48,61 @@ $("button[name=print]").click( function()
 $( "select[name=level]" ).change( function() {
 
     var value = $( this ).val();
-    console.log(value);
+    console.log("Drop-down-changed value:" + value);
 });
 
+/****************************************************************************************************
+ * gameLoad() - loads a stored game (just accesses the hard-coded "Game Store" for demo
+ *
+ */
+function gameLoad() {
+    var gameLevel = $("select[name='level']").val();
+    var inputMode = "";
+    if ($("#c00").hasClass("input")) {
+        // if #c00 has "input" they all should have "input" -
+        inputMode = "input";
+    } else {
+        inputMode = "noinput";
+    }
+
+    var levelLen = gameStore[gameLevel][lastIndex[gameLevel]].length;
+
+    for (var i= 0; i < levelLen; i++) {
+
+        var cellValue = gameStore[gameLevel][lastIndex[gameLevel]][i];
+        var cvArray = [];
+        cvArray = cellValue.split(":");
+
+        if (inputMode == "input") {
+            $("> input","#" + cvArray[0]).val( cvArray[1]).attr("readonly",true).attr("disabled",true);
+
+        } else {
+            $("#" + cvArray[0]).text( cvArray[1]).addClass("readonly");
+        }
+
+    }
+
+    
+    console.log( "levelLen:" + levelLen );
+
+
+}
 /***************************************************************************************************
  * Game Store
  * - this should coordinate ajax calls to the db, however due to time constraints -
  * - several demo games are pre-loaded into arrays.
  * - since javascript doesn't have associative arrays, the cellId => value is concatenated (similar to undoStack[])
  */
+var lastIndex = [];
 var last0Index = 0;  // beginner games accessed
 var last1Index = 0;  // easy games accessed
 var last2Index = 0;  // medium games accessed
 var last3Index = 0;  // hard games accessed
 var last4Index = 0;  // expert games accessed
 
+lastIndex = [last0Index, last1Index, last2Index, last3Index, last4Index];
+
+var gameStore = [];
 var game0Store = [];
 var game1Store = [];
 var game2Store = [];
@@ -77,3 +117,5 @@ var g30 = ["c01:9","c03:2","c05:6","c08:1","c10:6","c13:1","c18:3","c27:4","c30:
 game0Store = [g00];
 
 game3Store = [g30];
+
+gameStore = [game0Store, game1Store, game2Store, game3Store, game4Store];
