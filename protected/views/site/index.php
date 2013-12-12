@@ -6,6 +6,7 @@ $baseUrl = Yii::app()->baseUrl;
 $cs->registerCoreScript('jquery.ui');
 $cs->registerScriptFile($baseUrl . '/js/grid.js', CClientScript::POS_END);
 $cs->registerScriptFile($baseUrl . '/js/game.js', CClientScript::POS_END);
+$cs->registerScriptFile($baseUrl . '/js/preferences.js', CClientScript::POS_END);
 $cs->registerScript('juiAccordian','$("#sidebar").accordion();', CClientScript::POS_READY);
 $cs->registerCssFile($cs->getCoreScriptUrl() . '/jui/css/base/jquery-ui.css');
 $cs->registerCssFile($baseUrl . '/css/grid.css');
@@ -16,7 +17,7 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
 
 <h1>Welcome to <i><?php echo CHtml::encode($headerName); ?></i></h1>
 
-<p id="game-caption"></p>
+<h5 id="game-caption"></h5>
 <div id="game">
     <form name="game" method="post" action="index.php">
         <div id="grid" class="block-wrapper">
@@ -53,21 +54,26 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
         <div id="elapsed-time">0:00</div>
     </div>
     <hr>
-    <button name="load" type="button">New Game</button>
-    <button name="reset" type="button">Reset</button>
-    <button name="play" type="button">Play</button>
     <strong>Difficulty Level:</strong>
     <select name="level" size="1">
-        <option value="0">Beginner</option>
-        <option value="1">Easy</option>
-        <option value="2">Medium</option>
-        <option value="3">Hard</option>
-        <option value="4">Expert</option>
+        <option value="1">Beginner</option>
+        <option value="2">Easy</option>
+        <option value="3">Medium</option>
+        <option value="4">Hard</option>
+        <option value="5">Expert</option>
     </select>
-
-    <!-- <button name="hint" type="button">Hint</button> -->
+    <button name="load" type="button">New Game</button>
+    <button name="reset" type="button">Reset</button>
+    <button name="pause" type="button">Pause</button>
+    <!--
     <hr>
+    <button name="hint" type="button">Hint</button>
+    -->
+    <hr>
+    <button name="save" type="button">Save</button>
+    <!-- -->
     <button name="print" type="button">Print</button>
+    <!-- -->
 </div>
 <div id="sidebar">
     <h3>Instructions</h3>
@@ -83,7 +89,11 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
     </div>
     <h3>Preferences</h3>
     <div>
-        <p>Some preferences</p>
+        <form name="preferences" method="post" action="">
+            <input type="checkbox" name="keyboard" value="enabled" checked>Keyboard Entry<br>
+        </form>
+        <br>
+        <button name="pref-apply" type="button" disabled>Apply</button>
     </div>
     <h3>Additional Information</h3>
     <div>

@@ -1,6 +1,6 @@
 /*!
  * JavaScript file: grid.js
- * - responsible for handling input to sudoku grid
+ * - responsible for handling input to sudoku grid; associated with <div id="game">
  *
  * Date: 2013-11-18
  *
@@ -13,7 +13,7 @@
  * .valid - all cells with numbers that pass input evaluation  (all .readonly values start as .valid)
  * .invalid - all cells with numbers that fail input evaluation
  * .readonly - all cells with values set programmatically by the initial game grid load
- *           (.readonly added as class to div.cell and as html attribute to <input>s if present)
+ *           (.readonly added as class to div.cell and as html property to <input>s if present)
  *
  * Note: All entries must be .valid or .invalid (or blank cell / neither class == no entry).
  *       Cells may also be .selected, .current and .readonly.
@@ -34,10 +34,12 @@
  */
 $( document ).ready( function() {
 
+    // square-up the grid based on the loaded width -
     var grid = $('#grid');
     var gw = grid.width();
     grid.css({'height': gw + 'px' });
     console.log( '#grid width: ' + gw );
+
 });
 
 // **************************************************************************************************
@@ -46,6 +48,7 @@ $( document ).ready( function() {
 var undoStack = [];
 /********************************************************************************************
  * undoPush() concatenates the cellId and value and controls the Undo button
+ * - jQuery note: use .prop(), NOT .attr() to set disabled - jbl
  * @param cellId
  * @param value
  */
@@ -59,13 +62,14 @@ function undoPush( cellId, value) {
         value = '';
     }
     var i = undoStack.push(cellId + ':' + value);
-    $("button[name=undo]").removeAttr("disabled");
+    $("button[name=undo]").prop("disabled", false);
     console.log("undoPush: i:" + i + " cellId:" + cellId + " value:" + value);
 }
 
 /********************************************************************************************
  * undoPop() returns the last cellId and value in array and controls the Undo button
  * - since undoPush 'strings' the input, undoPop 'unstrings' the output.
+ * - jQuery note: use .prop(), NOT .attr() to set disabled - jbl
  */
 function undoPop() {
 
@@ -73,7 +77,7 @@ function undoPop() {
     if (undoStack.length > 0) {
         // check if this is last item and return the pop();
         if (undoStack.length == 1) {
-            $("button[name=undo]").attr("disabled", "disabled");
+            $("button[name=undo]").prop("disabled", true);
         }
         var i = undoStack.pop();
         lastDo = i.split(":");
@@ -326,7 +330,7 @@ function getMatchCells( inputClass, selector, value ) {
 var oldValue = "";
 var newValue = "";
 var selectInfo = [];
-$( "input" ).on({
+$("input[type='text']").on({
     "keypress": function (e) {
 
         // using both keyCode and which due to browser variations - jbl

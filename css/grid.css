@@ -91,10 +91,17 @@ input.invalid {
 
 /* Need to distinguish #grid div.cell from #tracker div.cell to allow % sizing
  * - #grid div.cell is nested in .block
- * - .cell.input is required because <input> is class .cell      */
+ * - .cell.input is required because <input> is class .cell as well
+ * - .cell.noinput is also required due to the issue above                  */
 #grid .cell.input {
     width: 32%;  /* approx. 51px*/
     height: 32%;  /* should match width (i.e. a square) */
+}
+
+/* Need .cell.noinput because lack of nested <input> changes things (see above #grid .cell.input) */
+#grid .cell.noinput {
+    width: 32%;  /* approx. 51px*/
+    height: 27.5%;  /* should match width (i.e. a square) */
 }
 
 #tracker {
