@@ -55,7 +55,7 @@ $("button[name='pref-apply']").click( function() {
         var hasStorage = hasLocalStorage();
 
         if (!hasStorage) {
-            storageYes = confirm( "Your browser does not support local storage.  Preference changes will only apply to current page.")
+            storageYes = confirm( "Your browser does not support local storage.  Preference changes will only apply until next page refresh.")
         }
 
         if (confirmYes && storageYes) {
@@ -76,6 +76,7 @@ $("button[name='pref-apply']").click( function() {
                 }
                 useKeyboard = false;
                 $("button[name='reset']").click();
+                $("input[type='checkbox']").change();
             }
         }
 
@@ -84,8 +85,8 @@ $("button[name='pref-apply']").click( function() {
     }
 });
 
-$("input[type='checkbox']").on({
-    "change": function() {
+$("input[type='checkbox']").change( function() {
+
         // toggle the apply based on checked status -
         checkStatus = $("input[name='keyboard']").prop( "checked" );
 
@@ -97,5 +98,4 @@ $("input[type='checkbox']").on({
             // change unregistered - disable Apply -
             $("button[name='pref-apply']").prop( "disabled", true );
         }
-    }
 });

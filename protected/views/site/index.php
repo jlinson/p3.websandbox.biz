@@ -72,7 +72,7 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
     <hr>
     <button name="save" type="button">Save</button>
     <!-- -->
-    <button name="print" type="button">Print</button>
+    <button name="grid-save" id="grid-save" type="button" disabled>Save Grid</button>
     <!-- -->
 </div>
 <div id="sidebar">

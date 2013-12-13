@@ -66,7 +66,7 @@ input.input-cell {
 
 .selected,
 .selected input {
-    background-color: mintcream;
+    background-color: aliceblue;
     border-color: royalblue;
 }
 
@@ -82,11 +82,19 @@ input.invalid {
     color: red;
 }
 
+.readonly {
+background-color: #f8f8f8;
+}
+
 /* #game, #game-btns & #sidebar comprise entire #page width  */
 #game {
     width: 522px;   /* approx. 55% of .container #page 950px set by screen.css  */
     float: left;
     margin: 0;
+}
+
+#game-caption {
+    margin-left: 20px;
 }
 
 /* Need to distinguish #grid div.cell from #tracker div.cell to allow % sizing
@@ -101,7 +109,7 @@ input.invalid {
 /* Need .cell.noinput because lack of nested <input> changes things (see above #grid .cell.input) */
 #grid .cell.noinput {
     width: 32%;  /* approx. 51px*/
-    height: 27.5%;  /* should match width (i.e. a square) */
+    height: 27.3%;  /* should match width (i.e. a square) */
 }
 
 #tracker {
@@ -144,6 +152,10 @@ input.invalid {
     margin-right: 5px;
     margin-top: 5px;
     margin-bottom: 5px;
+}
+
+#grid-save {
+    visibility: hidden;
 }
 
 #timers {

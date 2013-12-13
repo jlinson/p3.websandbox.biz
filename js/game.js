@@ -23,7 +23,8 @@ $( document ).ready( function() {
 
     var loadValue = getGetValue( searchArray, "load" );
     if (loadValue == 'blank') {
-        // don't auto-load any game - used for game grid entry
+        // don't auto-load any game, just enable 'grid-save' button - used for game grid entry
+        $("#grid-save").css("visibility", "visible").prop("disabled", false);
 
     } else if ($.isNumeric( loadValue )) {
         // try to load the requested game
@@ -134,7 +135,7 @@ $("button[name=save]").click( function(){
     gameSave();
 });
 
-$("button[name=print]").click( function(){
+$("button[name=grid-save]").click( function(){
     gameGridSave();
 });
 
@@ -165,10 +166,14 @@ function gameLoad( gameId ) {
         // ensure gameId is sanitized (in case of eval()) and an integer (force the integer) -
         gameId = Math.round(gameId);
     } else {
+        // just go with the default game -
         gameId = 0;
     }
     console.log( "gameLoad - gameId:" + gameId);
 
+    if (gameId == 0) {
+        // just load the default game based on level selected -
+    }
     var gameLevel = $("select[name='level']").val();
     var gameLevelNm = $("select[name='level'] option:selected").text();
     var gameLevelNdx = (gameLevel - 1);

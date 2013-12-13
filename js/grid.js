@@ -103,13 +103,19 @@ function setSelected( pickId ) {
             undoPush( selected[3], selected[0] );
         }
         if (selected[1] == "noinput") {
-            selected[2].text(num);
+            // check for .readonly - indicates original game grid cell that cannot change -
+            if (selected[2].hasClass("readonly")) {
+                alert("Starting game value - cannot be changed.");
+            } else {
+                selected[2].text(num);
+            }
         } else {
+            // input mode - no need to check for readonly - automatically enforced by element property -
             selected[2].val(num);
             selected[2].focus();
         }
-    // Add new number to end of array to pass prior [0] and new [4] values
-    selected[selected.length] = num;
+
+    // Pass new number to tag 'current number' cells and evaluate for conflicts -
     tagCurrent( selected[0], selected[1], num );
     evalInput( selected[0], num, selected[3] );
    }
@@ -152,10 +158,13 @@ function tagCurrent( oldValue, inputClass, newValue ) {
     if (newValue) {
         // means we have a new value set by setSelected()
         num = newValue;
+        console.log("")
     }
+
     $(".current").removeClass("current");
     // Only re-tag 'current' for non-blank numbers (click can toggle-off selected in noinput mode).
-    if (num) {
+    // - issue: empty num passes several if test; >= && <= is best filter found - jbl
+    if (num >= 1 && num <= 9) {
         $(".cell:contains('" + num + "')").addClass("current"); // works for .cell, but NOT for <input>
         if (inputClass == "input") {
             // input value (property, not attribute) needs to be selected this way -
@@ -228,7 +237,7 @@ function evalInput( oldValue, newValue, cellId ) {
         if ($matchResult.length > 0) {
             // iterate and recurse back to evalInput on each match - pass oldValue as newValue for recursive call;
             $matchResult.each( function() {
-                if (inputMode = "input") {
+                if (inputMode == "input") {
                     evalInput( 0, oldValue, $(this).parent().attr("id"));
                 } else {
                     evalInput( 0, oldValue, $(this).attr("id"));
@@ -306,7 +315,8 @@ function getMatchCells( inputClass, selector, value ) {
                             })
     } else {
         // user-selected (or device-limitation-selected) "noinput" mode -
-        $matchResult = $(selector + ":contains('" + value + "')");
+        $matchResult = $("> .cell.noinput", selector + ":contains('" + value + "')"); // TODO:
+//       $matchResult = $(selector + " > .cell.noinput :contains('" + value + "')");
     }
 
     return $matchResult;
@@ -478,10 +488,12 @@ $("button[name=note]").click( function() {
 $("button[name=erase]").click( function()
 {
     // just pass a single char to setSelected - "e" indicates "erase" called it -
-    // - don't bother erasing an empty cell (TODO: Erase is not 'disabled')
+    // - don't bother erasing an empty cell - trim() found to be required (TODO: Erase is not 'disabled')
     var selected = getSelected();
-    if (selected[0]) {
+    if (selected[0].trim()) {
         setSelected('e');
+
+        console.log("erase - selected[0]:" + selected[0]);  // if not working!!!! - see tagCurrent >= && <= fix
     }
 });
 
