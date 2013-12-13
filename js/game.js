@@ -189,6 +189,7 @@ function gameLoad( gameId ) {
 
         if (inputMode == "input") {
             $("> input","#" + cvArray[0]).val( cvArray[1]).prop("readonly",true).prop("disabled",true).addClass("valid");
+            $("#" + cvArray[0]).addClass("readonly");  // add here for .css; the .js relies on prop("readonly") - jbl
 
         } else {
             $("#" + cvArray[0]).text( cvArray[1]).addClass("readonly valid");

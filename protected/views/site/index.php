@@ -40,7 +40,7 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
         <button name="undo" type="button" disabled>Undo &#8634;</button>
         <!-- <button name="redo" type="button" disabled>Redo &#10227;</button> -->
         <button name="note" type="button">Note &#9997;</button>
-        <button name="erase" type="button">Erase &#10008;</button>
+        <button name="erase" type="button" disabled>Erase &#10008;</button>
     </div>
     <div id="tracker" class="block-wrapper">
         <?php for ($t=0; $t < 9; $t++): ?>

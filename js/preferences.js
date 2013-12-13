@@ -4,9 +4,10 @@
  *
  * Date: 2013-11-30
  *
+ * requires: game.js -->  hasLocalStorage()
+ *
  * TODO: eliminate experimental js
  * TODO: eliminate console.log() [grep files]
- *
  */
 
 var useKeyboard = true;  // html default

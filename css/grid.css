@@ -82,7 +82,8 @@ input.invalid {
     color: red;
 }
 
-.readonly {
+.readonly,
+.readonly input {
 background-color: #f8f8f8;
 }
 
