@@ -182,16 +182,22 @@ function gameLoad( gameId ) {
     } else {
         gameLevel = String(gameId).substr(0,1);
         if (gameLevel > 0 && gameLevel < 6) {
-            $("select[name='level']").val(gameLevel);
+                $("select[name='level']").val(gameLevel);
         } else {
-            alert("Invalid game difficulty requested. Reverting to default level.");
+            alert("Invalid 'difficulty level' requested. Reverting to default level.");
             gameLevel = 1;
         }
     }
-    var gameLevelNm = $("select[name='level'] option:selected").text();
 
     // Get the gameNdx into gameStore[][] based on valid gameLevel and gameId -
     var gameNdx = setLastIndex( gameLevel, gameId );
+
+    if (gameNdx != (gameLevel - 1)) {
+        // must have been forced down a level - re-retrieve the game level -
+        gameLevel = $("select[name='level']").val();
+        alert("Did not find requested game. Will load next easier game. Select another level or submit a 'Contact' request. Thank you.");
+    }
+    var gameLevelNm = $("select[name='level'] option:selected").text();
 
     var levelLen = gameStore[gameNdx][lastIndex[gameNdx]].length;
     var inputMode = getInputMode();
@@ -237,34 +243,41 @@ function gameLoad( gameId ) {
 function setLastIndex( gameLevel, gameId ) {
 
     var gameNdx = (gameLevel - 1);
-    var lastNdx = String(gameId).substr(1).valueOf();
+    var lastNdx = String(gameId).substr(1);
 
     console.log( "lastNdx - in:" + lastNdx);
     // check if we have any game referenced -
     if (!lastNdx || (lastNdx < 0)) {
         // no valid lastNdx passed - go with default based on lastIndex global -
-        // - warning: do the next two lines separately - assignment happens before increment!!!
+        // - warning: do the next two lines separately - otherwise, assignment happens before increment!!!
         lastIndex[ gameNdx ]++;
         lastNdx = lastIndex[ gameNdx ];
-        alert("Dropped In");
+        console.log("Dropped In - no lastNdx");
     }
-    console.log( "GameNdx: " + gameNdx + " lastNdx - raw: " + lastNdx + ":" + lastIndex );
+    console.log( "GameNdx: " + gameNdx + " lastNdx-raw: " + lastNdx + ":" + lastIndex );
 
     // set the lastIndex for the requested level, but make sure we don't blow-out our array -
     var maxNdx = (gameStore[ gameNdx ].length - 1);
-    if (lastNdx > maxNdx) {
+    if (maxNdx < 0) {
+        // no games at that level - drop down a level and recurse -
+        if (gameNdx > 0) {
+            $("select[name='level']").val(gameNdx);
+            gameNdx = setLastIndex( gameNdx, gameId );
+
+        } else {
+            alert("Wow! We seem to have run out of games. Please submit a 'Contact' request. Thank you.");
+            return 0;
+        }
+
+    } else if (lastNdx > maxNdx) {
         // revert back to first index -
         lastIndex[ gameNdx ] = 0;
-        
-    } else if (maxNdx < 0) {
-        // drop down a level and recurse -
-        gameNdx = setLastIndex( gameNdx, gameId);
 
-    } else {
+    }else {
         lastIndex[ gameNdx ] = lastNdx;
     }
 
-    console.log( "GameNdx: " + gameNdx + " maxNdx:" + maxNdx + " lastNdx: " + lastNdx + ":" + lastIndex );
+    console.log( "GameNdx: " + gameNdx + " maxNdx:" + maxNdx + " lastNdx: " + lastNdx + " : " + lastIndex );
 
     return gameNdx;
 }
