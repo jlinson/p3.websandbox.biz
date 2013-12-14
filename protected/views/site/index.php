@@ -38,8 +38,6 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
     </form>
     <div id="grid-btns">
         <button name="undo" type="button" disabled>Undo &#8634;</button>
-        <!-- <button name="redo" type="button" disabled>Redo &#10227;</button> -->
-        <button name="note" type="button">Note &#9997;</button>
         <button name="erase" type="button" disabled>Erase &#10008;</button>
     </div>
     <div id="tracker" class="block-wrapper">
@@ -49,12 +47,8 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
     </div>
 </div>
 <div id="game-btns">
-    <div id="timers">
-        <strong>Elapsed Time:</strong>
-        <div id="elapsed-time">0:00</div>
-    </div>
     <hr>
-    <strong>Difficulty Level:</strong>
+    <strong>Game Level:</strong>
     <select name="level" size="1">
         <option value="1">Beginner</option>
         <option value="2">Easy</option>
@@ -64,32 +58,27 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
     </select>
     <button name="load" type="button">New Game</button>
     <button name="reset" type="button">Reset</button>
-    <button name="pause" type="button">Pause</button>
-    <!--
     <hr>
-    <button name="hint" type="button">Hint</button>
-    -->
-    <hr>
-    <button name="save" type="button">Save</button>
-    <!-- -->
+    <!-- <button name="save" type="button">Save</button> -->
+    <!--   hidden   -->
     <button name="grid-save" id="grid-save" type="button" disabled>Save Grid</button>
-    <!-- -->
+    <!-- end of hidden -->
 </div>
 <div id="sidebar">
     <h3>Instructions</h3>
     <div>
         <h5>Game Rules:</h5>
         <p>Solve the Su Doku puzzle by entering a number from 1 to 9 in the empty cells. Each number can only
-        appear once in a row, once in a column and once in each 3x3 grid. </p>
+        appear once in a row, once in a column and once in each 3x3 grid.</p>
         <h5>Sudo Sudoku Instructions:</h5>
-        <p>To start a game, click 'New Game'. You can select the game difficulty from the 'Difficulty Level'
-        drop-down. On large screens, both keyboard and mouse/touch entry works. Click on a cell, then type a
+        <p>To start a game, click 'New Game'. You can select the game difficulty from the 'Game Level'
+        drop-down. On large screens, both keyboard and mouse/touch entry work. Click on a cell, then type a
         number, or select a number from the number bar below the grid. You can turn off keyboard input in the
-        Preferences section.</p>
+        <strong>Preferences</strong> section.</p>
     </div>
     <h3>Preferences</h3>
     <div>
-        <form name="preferences" method="post" action="">
+        <form name="preferences" method="post" action="index.php">
             <input type="checkbox" name="keyboard" value="enabled" checked>Keyboard Entry<br>
         </form>
         <br>
@@ -97,12 +86,15 @@ $headerName = substr(Yii::app()->name, 0, strpos(Yii::app()->name, "("))
     </div>
     <h3>Additional Information</h3>
     <div>
-        <p>See the Preferences section for additional game settings.</p>
-        <p>Click the About option in the top menu to learn more about this program.</p>
+        <p>See the <strong>Preferences</strong> section for additional game settings.</p>
+        <p>Click the <strong>About</strong> option in the top menu to learn more about this program.</p>
+        <p>If you have any questions, comments, or encounter any problems, please feel free to fill out a
+           <strong>Contact</strong> form.</p>
+         <p>Thank you.</p>
     </div>
     <h3>Yii Framework Info</h3>
     <div>
-        <p>For more details on how to further develop this application, please read
+        <p>For more details regarding the framework used to develop this application, please read
         the <a href="http://www.yiiframework.com/doc/">documentation</a>.
         Feel free to ask in the <a href="http://www.yiiframework.com/forum/">forum</a>,
         should you have any questions.</p>

@@ -15,17 +15,15 @@
  * .readonly - all cells with values set programmatically by the initial game grid load
  *           (.readonly added as class to div.cell and as html property to <input>s if present)
  *
- * Note: All entries must be .valid or .invalid (or blank cell / neither class == no entry).
+ * Note: All entries must be .valid or .invalid (or neither for blank cell == no entry).
  *       Cells may also be .selected, .current and .readonly.
  *       Game is won when all 81 cells are .valid!
  *
  * Ids required by this js:
- * #c00 - for all 'c'ells where first number indicates the 0 indexed 3x3 block
- *        and the second number indicates the 0 indexed cell within the block
+ * #c00 - for all 'c'ells where first number indicates the 0-indexed 3x3 block
+ *        and the second number indicates the 0-indexed cell within the block
  * #t1 - for the 't'racker numbers that are picked for input into the grid cells
  *
- * TODO: eliminate experimental js
- * TODO: eliminate console.log() [grep files]
  * TODO: try the js.ValidationEngine
  */
 
@@ -38,7 +36,6 @@ $( document ).ready( function() {
     var grid = $('#grid');
     var gw = grid.width();
     grid.css({'height': gw + 'px' });
-    console.log( '#grid width: ' + gw );
 
 });
 
@@ -63,7 +60,6 @@ function undoPush( cellId, value) {
     }
     var i = undoStack.push(cellId + ':' + value);
     $("button[name=undo]").prop("disabled", false);
-    console.log("undoPush: i:" + i + " cellId:" + cellId + " value:" + value);
 }
 
 /********************************************************************************************
@@ -82,7 +78,6 @@ function undoPop() {
         var i = undoStack.pop();
         lastDo = i.split(":");
     }
-    console.log("undoPop: cellId:" + lastDo[0] + " value:" + lastDo[1] );
     return lastDo;
 }
 
@@ -188,7 +183,6 @@ function setSelected( $jqObject, inputClass, goTag ) {
         }
     }
 
-    console.log( "selectedValue: " + selectedValue + " readonly: " + readonly);
     // If we have a non-empty value that is not 'readonly', then enable 'erase' button -
     if (selectedValue && !(readonly)) {
         toggleErase( true );
@@ -200,13 +194,12 @@ function setSelected( $jqObject, inputClass, goTag ) {
         // Now flag all the matching (current) values -
         tagCurrent( selectedValue, inputClass );
     }
-
     return selectedValue;
 }
 
 /*************************************************************************************************************
  * toggleErase() - common logic to toggle the 'erase' button (called from setSelected() and setSelectedValue()
- * - reverse the logic here - 'true' enables 'erase' by setting 'disabled' to 'false
+ * - reverse the std logic here - 'true' enables 'erase' by setting 'disabled' to 'false
  * @param eraseState  - boolean
  */
 function toggleErase( eraseState ) {
@@ -270,9 +263,9 @@ function tagCurrent( currentValue, inputClass ) {
 }
 
 /************************************************************************************************************
- * evalInput() - flags violations of the game rule and tags cells in violation as .invalid; otherwise .valid
+ * evalInput() - flags violations of the game rules and calls validateCell() to tag cells in violation as .invalid or .valid
  * - only looks at .current numbers to determine new conflicts because only new entry will create conflict.
- * - must re-evaluate .invalid numbers to see if changes or erasers have eliminated conflicts.
+ * - must re-evaluate .invalid numbers (recursive call) to see if changes or erasers have eliminated conflicts.
  * - relies on css to style the numbers in conflict.
  * @param oldValue     - selected[0]
  * @param newValue
@@ -346,7 +339,6 @@ function evalInput( oldValue, newValue, cellId ) {
         if (validCnt == 81) {
             alert("Congratulations - Sudoku Solved!");
         }
-        console.log( "validCnt: " + validCnt );
     }
 }
 
@@ -378,8 +370,6 @@ function validateCell( inputClass, cellId, selector, value, alreadyInvalid ) {
         matchCnt = 0;
     }
 
-    console.log( "validateCell: value:" + value + " matchCnt:" + matchCnt + " matchResult:" + $matchResult);
-
     if (matchCnt > 1) {
         // have multiple numbers in block, row or column (depending on selector) -
         $matchResult.removeClass("valid").addClass("invalid");
@@ -392,7 +382,6 @@ function validateCell( inputClass, cellId, selector, value, alreadyInvalid ) {
         // new entry has no block, row or column conflicts => valid entry
         $matchResult.removeClass("invalid").addClass("valid");
     }
-
     return matchCnt;
 }
 
@@ -431,7 +420,6 @@ function getMatchCells( inputClass, selector, value ) {
             $matchResult = $(selector + ":contains('" + value + "')");
         }
     }
-
     return $matchResult;
 }
 
@@ -439,17 +427,25 @@ function getMatchCells( inputClass, selector, value ) {
 // Event listeners:
 /****************************************************************************************************
  * "input" class listener - used to limit inputs to integers 1 through 9
- *  - this does NOT prevent pasting of invalid values; capturing .click() doesn't solve this (paste is not a click).
+ *  - "keypress" does NOT prevent pasting of invalid values; capturing .click() doesn't solve this (paste is not a click).
  *  - chrome does NOT fire this with tab, shift, ctrl, etc., BUT FIREFOX DOES (must ignore to allow those keys in Firefox).
  *  - eliminating <input type="text"> and using "noinput" class eliminates need for "input" listener
  *
+ *  - "keyup" is required to grab the keyboard input that passes "keypress" validation
+ *  - oldValue <=> newValue comparison is required because "keyup" fires on ANY keyup; need to limit eval to changes.
+ *  - "keyup" fires even when toggling away from window (i.e. any keyup will fire this while input has focus).
+ *
+ *  - "change" only fires when the input loses focus (by tab, click, window toggle, etc.)
+ *  - needed to trap 'paste' entries for evaluation - "keypress" and "keyup" don't fire on 'paste'.
+ *
+ *  Note: "change" fires before on.focusout
+ *        "blur" fires after on.focusout
+ *        warning: on.focusout fires event when a button is clicked, even though "selected" cell unchanged.
+ *
+ *  - just toggling window will cause focusout (and keyup) to fire - tie oldValue / newValue resets to on.focusin
+ *
  *  Note this: http://stackoverflow.com/questions/2176861/javascript-get-clipboard-data-on-paste-event-cross-browser
  */
-
-// using keyup - this fires and logs value even when value doesn't change
-// - $(this).val() - only get PRIOR value, and only if highlighted and changed (blanked and re-type yields blank)
-// - NEED old and new values to keep event from logging new value just pressing keys with no change!!!
-// - also keyup fires even when toggling away from window (i.e. any keyup will fire this while input has focus).
 var oldValue = "";
 var newValue = "";
 
@@ -458,7 +454,7 @@ $("input[type='text']").on({
 
         // using both keyCode and which due to browser variations - jbl
         var key_code = e.keyCode || e.which;
-        console.log(" key_code:" + key_code);
+
         if (key_code == 9) {
             // allow tab key
             return true;
@@ -493,15 +489,10 @@ $("input[type='text']").on({
             oldValue = newValue;
         }
     },
-    "focusout": function() {
-        //oldValue = "";
-        //newValue = "";
-        console.log( "on.focusout: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + oldValue + " new:" + newValue );
-    },
     "change": function(e) {
 
         var value = $(this).val();
-        console.log( "on.change: " + value);
+
         if ((value != '')) {
             if (value.match(/[^1-9]/g)) {
                 e.preventDefault(); // opted for this instead of "return false;" - jbl
@@ -513,20 +504,14 @@ $("input[type='text']").on({
         }
     }
 });
-// - change only fires when the input loses focus (by tab or click)
-// - but, this does only fire on changes
-
-// NOTE: blur fires after on.focusout!!!
-// - warning: on.focusout fires event when a button is clicked, even though "selected" cell unchanged.
-// - just toggling window will cause focusout (and keyup) to fire - tie oldValue / newValue resets to on.focusin
 
 /****************************************************************************************************
  * div.cell.input class 'focusin' listener -
  *  - used to provide tab key 'select' capability.
- *  - coordinate with the div.cell 'click' listener 'select'er below.
- *  - required with <input type="text">; unnecessary if using "noinput" class.
-****************************************************************************************************
- * div.cell.noinput and div.cell.pickem class click listener -
+ *  - coordinate with the div.cell 'click' listener bound to same selector (below).
+ *  - required with <input type="text">; 'focusin' should be unnecessary when using "noinput" mode.
+ ****************************************************************************************************
+ * div.cell.noinput and div.cell.pickem class 'click' listener -
  *  - used to allow mouse-click or touch-screen to 'select' a div.cell.input/.noinput,
  *  - then a clicked number in div.cell.pickem can be placed in the 'selected' cell.
  *  - requires .css to style div.selected (to actually show highlight, etc.)
@@ -547,7 +532,6 @@ $(".cell").on({
     // just got focus - no new value -
     newValue = "";
 
-    console.log( "on.focusin: " + $(this).attr("id") + $("> input", this).attr("name") + ": " + "old:" + oldValue + " new:" + newValue );
     },
     "click": function() {
 
@@ -567,7 +551,6 @@ $(".cell").on({
             var id = $(this).attr("id");
             setSelectedValue(id);
         }
-        console.log( "Cell clicked: " + $(this).attr("id"));
     }
 });
 
