@@ -9,6 +9,7 @@
  *
  * TODO: eliminate experimental js
  * TODO: eliminate console.log() [grep files]
+ * TODO: make <input> disabled a preference
  *
  */
 
@@ -47,7 +48,7 @@ $( document ).ready( function() {
             // load the game grid -
             gameLoad( savedGameId );
             // then see if any entries were saved -
-
+            // TODO: next version
 
         } else {
             // no game found - load default game -
@@ -115,7 +116,8 @@ $("button[name=load]").click( function() {
     var confirmYes = confirm( "Are you sure you want to clear the game and load the next one?  Have you selected a difficulty level?" );
     if (confirmYes) {
         gameClear();
-        gameLoad( eval(gameIdCurrent + 1) );
+//        gameLoad( eval(gameIdCurrent + 1) );
+        gameLoad(0);  // default behavior = next game at level selected
     }
 });
 
@@ -171,32 +173,46 @@ function gameLoad( gameId ) {
     }
     console.log( "gameLoad - gameId:" + gameId);
 
+    var gameLevel = 1; // "Beginner" default
+
+    // Set valid gameLevel based on gameId (default, passed by $_GET, or retrieved from localStorage) -
     if (gameId == 0) {
         // just load the default game based on level selected -
+        gameLevel = $("select[name='level']").val();
+    } else {
+        gameLevel = String(gameId).substr(0,1);
+        if (gameLevel > 0 && gameLevel < 6) {
+            $("select[name='level']").val(gameLevel);
+        } else {
+            alert("Invalid game difficulty requested. Reverting to default level.");
+            gameLevel = 1;
+        }
     }
-    var gameLevel = $("select[name='level']").val();
     var gameLevelNm = $("select[name='level'] option:selected").text();
-    var gameLevelNdx = (gameLevel - 1);
-    var inputMode = getInputMode();
 
-    var levelLen = gameStore[gameLevelNdx][lastIndex[gameLevelNdx]].length;
+    // Get the gameNdx into gameStore[][] based on valid gameLevel and gameId -
+    var gameNdx = setLastIndex( gameLevel, gameId );
+
+    var levelLen = gameStore[gameNdx][lastIndex[gameNdx]].length;
+    var inputMode = getInputMode();
 
     for (var i= 0; i < levelLen; i++) {
 
-        var cellValue = gameStore[gameLevelNdx][lastIndex[gameLevelNdx]][i];
+        var cellValue = gameStore[gameNdx][lastIndex[gameNdx]][i];
         var cvArray = [];
         cvArray = cellValue.split(":");
 
         if (inputMode == "input") {
-            $("> input","#" + cvArray[0]).val( cvArray[1]).prop("readonly",true).prop("disabled",true).addClass("valid");
+            $("> input","#" + cvArray[0]).val( cvArray[1] ).prop("readonly",true).prop("disabled",true).addClass("valid");
             $("#" + cvArray[0]).addClass("readonly");  // add here for .css; the .js relies on prop("readonly") - jbl
 
         } else {
-            $("#" + cvArray[0]).text( cvArray[1]).addClass("readonly valid");
+            // no keyboard "noinput" mode
+            $("#" + cvArray[0]).text( cvArray[1] ).addClass("readonly valid");
         }
 
     }
-    gameIdCurrent = eval( gameLevel + lastIndex[gameLevelNdx] );
+    gameIdCurrent = eval( gameLevel + lastIndex[gameNdx] );
     $("#game-caption").text(gameLevelNm + " Game: " + gameIdCurrent);
 
     // now save the current game in localStorage (if available) for reload next time -
@@ -206,6 +222,51 @@ function gameLoad( gameId ) {
     }
 
     console.log( "levelLen:" + levelLen );
+}
+
+/****************************************************************************************************
+ * setLastIndex() - determines the valid game to load and sets the lastIndex[] accordingly.
+ * - note that gameLevel is not zero-based, whereas the "Ndx" vars are zero-base to access gameStore array.
+ *
+ * requires: global Game Store arrays  (see below)
+ *
+ * @param gameLevel - 1 to 5 number representing the game level (per select drop-down) [Validate before passing!]
+ * @param gameId    - the passed-in game selector - indicates "default" or requested game number for validation here.
+ * @return gameNdx  - array index to reference the multi-dimensional gameStore[][] via lastIndex[].
+ */
+function setLastIndex( gameLevel, gameId ) {
+
+    var gameNdx = (gameLevel - 1);
+    var lastNdx = String(gameId).substr(1).valueOf();
+
+    console.log( "lastNdx - in:" + lastNdx);
+    // check if we have any game referenced -
+    if (!lastNdx || (lastNdx < 0)) {
+        // no valid lastNdx passed - go with default based on lastIndex global -
+        // - warning: do the next two lines separately - assignment happens before increment!!!
+        lastIndex[ gameNdx ]++;
+        lastNdx = lastIndex[ gameNdx ];
+        alert("Dropped In");
+    }
+    console.log( "GameNdx: " + gameNdx + " lastNdx - raw: " + lastNdx + ":" + lastIndex );
+
+    // set the lastIndex for the requested level, but make sure we don't blow-out our array -
+    var maxNdx = (gameStore[ gameNdx ].length - 1);
+    if (lastNdx > maxNdx) {
+        // revert back to first index -
+        lastIndex[ gameNdx ] = 0;
+        
+    } else if (maxNdx < 0) {
+        // drop down a level and recurse -
+        gameNdx = setLastIndex( gameNdx, gameId);
+
+    } else {
+        lastIndex[ gameNdx ] = lastNdx;
+    }
+
+    console.log( "GameNdx: " + gameNdx + " maxNdx:" + maxNdx + " lastNdx: " + lastNdx + ":" + lastIndex );
+
+    return gameNdx;
 }
 
 /****************************************************************************************************
@@ -287,15 +348,17 @@ function gameGridSave() {
  * - several demo games are pre-loaded into arrays.
  * - since javascript doesn't have associative arrays, the cellId => value is concatenated (similar to undoStack[])
  */
+// Global array of last used index into each level's gameStore array -
 var lastIndex = [];
-var last0Index = 0;  // beginner games accessed
-var last1Index = 0;  // easy games accessed
-var last2Index = 0;  // medium games accessed
-var last3Index = 0;  // hard games accessed
-var last4Index = 0;  // expert games accessed
+var last0Index = -1;  // beginner games accessed
+var last1Index = -1;  // easy games accessed
+var last2Index = -1;  // medium games accessed
+var last3Index = -1;  // hard games accessed
+var last4Index = -1;  // expert games accessed
 
 lastIndex = [last0Index, last1Index, last2Index, last3Index, last4Index];
 
+// Array of game grid values organized by difficulty level -
 var gameStore = [];
 var game0Store = [];
 var game1Store = [];

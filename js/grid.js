@@ -452,7 +452,7 @@ function getMatchCells( inputClass, selector, value ) {
 // - also keyup fires even when toggling away from window (i.e. any keyup will fire this while input has focus).
 var oldValue = "";
 var newValue = "";
-var selectInfo = [];
+
 $("input[type='text']").on({
     "keypress": function (e) {
 
@@ -498,10 +498,19 @@ $("input[type='text']").on({
         //newValue = "";
         console.log( "on.focusout: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + oldValue + " new:" + newValue );
     },
-    "change": function() {
+    "change": function(e) {
 
-        var value = $( this ).val();
+        var value = $(this).val();
         console.log( "on.change: " + value);
+        if ((value != '')) {
+            if (value.match(/[^1-9]/g)) {
+                e.preventDefault(); // opted for this instead of "return false;" - jbl
+                alert("Only numbers between 1 and 9 are valid entries.");
+                $(this).val('');
+            } else {
+                $(this).keyup();
+            }
+        }
     }
 });
 // - change only fires when the input loses focus (by tab or click)
@@ -538,7 +547,7 @@ $(".cell").on({
     // just got focus - no new value -
     newValue = "";
 
-    console.log( "on.focusin: " + $(this).parent().attr("id") + $(this).attr("name") + ": " + "old:" + oldValue + " new:" + newValue );
+    console.log( "on.focusin: " + $(this).attr("id") + $("> input", this).attr("name") + ": " + "old:" + oldValue + " new:" + newValue );
     },
     "click": function() {
 
