@@ -116,7 +116,6 @@ $("button[name=load]").click( function() {
     var confirmYes = confirm( "Are you sure you want to clear the game and load the next one?  Have you selected a difficulty level?" );
     if (confirmYes) {
         gameClear();
-//        gameLoad( eval(gameIdCurrent + 1) );
         gameLoad(0);  // default behavior = next game at level selected
     }
 });
@@ -218,7 +217,7 @@ function gameLoad( gameId ) {
         }
 
     }
-    gameIdCurrent = eval( gameLevel + lastIndex[gameNdx] );
+    gameIdCurrent = gameLevel + lastIndex[gameNdx];
     $("#game-caption").text(gameLevelNm + " Game: " + gameIdCurrent);
 
     // now save the current game in localStorage (if available) for reload next time -
@@ -248,10 +247,9 @@ function setLastIndex( gameLevel, gameId ) {
     console.log( "lastNdx - in:" + lastNdx);
     // check if we have any game referenced -
     if (!lastNdx || (lastNdx < 0)) {
-        // no valid lastNdx passed - go with default based on lastIndex global -
-        // - warning: do the next two lines separately - otherwise, assignment happens before increment!!!
-        lastIndex[ gameNdx ]++;
-        lastNdx = lastIndex[ gameNdx ];
+        // no valid lastNdx passed - go with default 'next game' based on lastIndex global -
+        // - warning: increment operator must precede lastIndex[] - otherwise, assignment happens before increment!!!
+        lastNdx = ++lastIndex[ gameNdx ];
         console.log("Dropped In - no lastNdx");
     }
     console.log( "GameNdx: " + gameNdx + " lastNdx-raw: " + lastNdx + ":" + lastIndex );
@@ -357,8 +355,8 @@ function gameGridSave() {
 
 /***************************************************************************************************
  * Game Store
- * - this should coordinate ajax calls to the db, however due to time constraints -
- * - several demo games are pre-loaded into arrays.
+ * - this should coordinate ajax calls to the db, however due to time constraints ...
+ * - ... several demo games are pre-loaded into arrays.
  * - since javascript doesn't have associative arrays, the cellId => value is concatenated (similar to undoStack[])
  */
 // Global array of last used index into each level's gameStore array -
@@ -373,19 +371,83 @@ lastIndex = [last0Index, last1Index, last2Index, last3Index, last4Index];
 
 // Array of game grid values organized by difficulty level -
 var gameStore = [];
-var game0Store = [];
-var game1Store = [];
-var game2Store = [];
-var game3Store = [];
-var game4Store = [];
+var game0Store = [];  // beginner games
+var game1Store = [];  // easy games
+var game2Store = [];  // medium games
+var game3Store = [];  // hard games
+var game4Store = [];  // expert games
 
+// Beginner game grids -
 var g00 = ["c03:2","c04:4","c05:1","c06:8","c07:3","c10:4","c12:2","c16:5","c20:6","c23:5","c25:7","c27:4","c28:1","c32:4","c37:5","c41:8","c42:1","c43:9","c45:5","c46:3","c47:4","c51:2","c56:8","c60:6","c61:9","c63:4","c65:5","c68:3","c72:7","c76:2","c78:4","c81:3","c82:2","c83:7","c84:1","c85:6"];
+var g01 = ["c01:9","c02:3","c04:6","c06:4","c13:3","c14:8","c15:9","c17:6","c21:5","c24:1","c28:2","c32:6","c33:5","c34:4","c36:8","c38:9","c42:7","c44:3","c46:5","c50:5","c52:1","c54:6","c55:8","c56:2","c60:1","c64:7","c67:3","c71:7","c73:9","c74:2","c75:1","c82:9","c84:3","c86:1","c87:2"];
+var g02 = ["c00:6","c01:5","c07:7","c11:8","c13:6","c15:4","c17:9","c18:1","c22:1","c24:2","c27:4","c31:9","c32:5","c33:4","c35:8","c38:1","c41:6","c44:3","c47:7","c50:3","c53:7","c55:2","c56:5","c57:6","c61:4","c64:3","c66:1","c70:8","c71:1","c73:7","c75:5","c77:2","c81:7","c87:5","c88:6"];
+var g03 = ["c01:3","c03:6","c08:8","c10:8","c12:2","c13:4","c14:9","c15:7","c21:6","c23:8","c26:7","c28:1","c32:5","c35:9","c36:7","c37:8","c40:6","c42:9","c46:2","c48:1","c51:8","c52:7","c53:5","c56:6","c60:2","c62:3","c65:1","c67:7","c73:5","c74:2","c75:4","c76:1","c78:8","c80:4","c85:6","c87:9"];
+var g04 = ["c03:2","c04:4","c05:1","c06:8","c07:3","c10:4","c12:2","c16:5","c20:6","c23:5","c25:7","c27:4","c28:1","c32:4","c37:5","c41:8","c42:1","c43:9","c45:5","c46:3","c47:4","c51:2","c56:8","c60:6","c61:9","c63:4","c65:5","c68:3","c72:7","c76:2","c78:4","c81:3","c82:2","c83:7","c84:1","c85:6"];
+var g05 = ["c00:4","c03:9","c05:3","c06:1","c12:8","c13:5","c17:3","c18:2","c20:3","c21:1","c22:6","c27:7","c30:8","c32:4","c35:1","c37:6","c41:5","c43:9","c45:7","c47:4","c51:2","c53:6","c56:9","c58:3","c61:3","c66:7","c67:4","c68:2","c70:1","c71:6","c75:5","c76:3","c82:7","c83:8","c85:4","c88:5"];
+var g06 = ["c02:5","c03:2","c05:9","c11:7","c12:2","c16:9","c18:3","c20:1","c23:6","c25:7","c26:8","c28:5","c31:1","c34:9","c36:7","c38:6","c40:4","c43:3","c45:7","c48:5","c50:7","c52:2","c54:8","c57:1","c60:3","c62:4","c63:6","c65:1","c68:8","c70:1","c72:6","c76:2","c77:3","c83:9","c85:4","c86:5"];
+var g07 = ["c02:7","c04:2","c06:5","c07:6","c11:5","c13:9","c14:1","c18:3","c20:8","c23:4","c24:5","c28:7","c32:6","c33:7","c34:8","c37:3","c41:3","c43:1","c45:9","c47:4","c51:9","c54:3","c55:4","c56:6","c60:3","c64:1","c65:9","c68:8","c70:6","c74:7","c75:5","c77:2","c81:7","c82:8","c84:4","c86:5"];
+var g08 = ["c04:8","c05:3","c06:5","c07:4","c12:8","c13:5","c14:9","c18:2","c20:5","c23:4","c24:2","c27:9","c30:9","c32:2","c34:3","c37:7","c40:8","c42:5","c46:9","c48:1","c51:1","c54:5","c56:3","c58:6","c61:1","c64:2","c65:4","c68:6","c70:2","c74:7","c75:3","c76:4","c81:4","c82:7","c83:9","c84:6"];
+var g09 = [];
+var g010 = [];
 
+// Easy game grids -
+var g10 = ["c01:5","c04:2","c06:7","c07:6","c13:1","c14:6","c16:9","c18:4","c22:7","c27:2","c28:1","c32:1","c34:3","c35:9","c36:4","c38:5","c44:8","c50:8","c52:9","c53:6","c54:7","c56:2","c60:3","c61:4","c66:5","c70:7","c72:8","c74:1","c75:2","c81:5","c82:2","c84:3","c87:9"];
+var g11 = [];
+var g12 = [];
+var g13 = [];
+var g14 = [];
+var g15 = [];
+var g16 = [];
+var g17 = [];
+var g18 = [];
+var g19 = [];
+var g110 = [];
 
-var g30 = ["c01:9","c03:2","c05:6","c08:1","c10:6","c13:1","c18:3","c27:4","c30:4","c32:5","c38:9","c41:7","c43:3","c45:5","c47:6","c50:6","c56:7","c58:8","c61:3","c70:2","c75:9","c78:8","c80:1","c83:8","c85:3","c87:2"]
+// Medium game grids -
+var g20 = ["c00:4","c04:6","c08:9","c12:5","c14:7","c16:8","c20:1","c24:2","c28:3","c32:5","c34:3","c36:2","c40:6","c41:1","c44:2","c47:8","c48:3","c52:4","c54:5","c56:7","c60:6","c64:9","c68:1","c72:4","c74:5","c76:7","c80:9","c84:6","c88:8"];
+var g21 = ["c02:8","c03:6","c08:4","c10:1","c11:5","c12:9","c15:4","c25:9","c27:2","c31:8","c32:3","c33:2","c35:1","c42:2","c44:8","c46:9","c53:7","c54:5","c56:2","c63:7","c72:3","c73:6","c77:2","c78:1","c80:5","c81:8","c82:6","c84:9","c88:3"];
+var g22 = [];
+var g23 = [];
+var g24 = [];
+var g25 = [];
+var g26 = [];
+var g27 = [];
+var g28 = [];
+var g29 = [];
+var g210 = [];
 
-game0Store = [g00];
+// Hard game grids -
+var g30 = ["c01:9","c03:2","c05:6","c08:1","c10:6","c13:1","c18:3","c27:4","c30:4","c32:5","c38:9","c41:7","c43:3","c45:5","c47:6","c50:6","c56:7","c58:8","c61:3","c70:2","c75:9","c78:8","c80:1","c83:8","c85:3","c87:2"];
+var g31 = ["c02:6","c05:9","c06:8","c10:8","c14:7","c16:2","c17:3","c18:4","c20:4","c30:5","c35:7","c36:2","c37:1","c44:2","c51:2","c52:7","c53:6","c58:5","c68:8","c70:9","c71:4","c72:2","c74:6","c78:1","c82:6","c83:3","c86:7"];
+var g32 = ["c01:1","c02:4","c07:5","c08:9","c10:3","c12:7","c14:1","c23:4","c26:8","c27:1","c30:5","c31:8","c36:7","c52:2","c57:5","c58:3","c61:3","c62:2","c65:7","c74:6","c76:1","c78:4","c80:6","c81:4","c86:3","c87:7"];
+var g33 = ["c04:2","c07:5","c13:8","c15:7","c17:3","c18:9","c20:3","c25:6","c30:3","c33:6","c34:8","c36:1","c42:4","c46:7","c52:8","c54:7","c55:9","c58:3","c63:7","c68:4","c70:3","c71:7","c73:5","c75:1","c81:9","c84:6"];
+var g34 = ["c00:3","c01:6","c06:9","c10:7","c14:3","c18:4","c20:9","c24:5","c28:1","c30:6","c34:8","c38:5","c40:5","c48:9","c50:3","c55:2","c57:6","c58:8","c62:8","c65:2","c70:2","c71:1","c72:7","c73:4","c77:9","c82:3"];
+var g35 = ["c00:3","c02:6","c06:8","c10:4","c12:1","c13:9","c18:6","c20:8","c28:3","c34:4","c35:3","c36:1","c37:9","c51:9","c52:5","c53:2","c54:7","c60:2","c68:7","c70:5","c75:4","c76:6","c78:9","c82:4","c86:5","c88:1"];
+var g36 = ["c01:9","c03:2","c05:6","c08:1","c10:6","c13:1","c18:3","c27:4","c30:4","c32:5","c38:9","c41:7","c43:3","c45:5","c47:6","c50:6","c56:7","c58:8","c61:3","c70:2","c75:9","c78:8","c80:1","c83:8","c85:3","c87:2"];
+var g37 = ["c00:6","c02:9","c03:8","c07:4","c12:4","c15:3","c20:5","c27:8","c28:7","c37:7","c41:4","c42:6","c43:5","c45:1","c46:9","c47:8","c51:3","c60:4","c61:5","c68:6","c73:6","c76:4","c81:1","c85:5","c86:9","c88:3"];
+var g38 = ["c05:8","c06:4","c11:1","c13:2","c16:8","c21:8","c24:7","c26:6","c30:2","c33:8","c37:6","c40:7","c43:1","c45:4","c48:5","c51:6","c55:5","c58:7","c62:3","c64:5","c67:9","c72:2","c75:7","c77:3","c82:6","c83:4"];
+var g39 = ["c01:3","c02:4","c04:9","c15:6","c16:9","c21:6","c22:7","c23:1","c30:6","c32:1","c33:3","c37:2","c40:2","c44:7","c48:3","c51:8","c55:6","c56:4","c58:1","c65:6","c66:2","c67:5","c72:2","c73:4","c84:7","c86:8","c87:3"];
+var g310 = [];
 
-game3Store = [g30];
+// Expert game grids -
+var g40 = ["c00:1","c01:5","c04:8","c11:4","c15:9","c27:8","c28:1","c31:3","c35:2","c43:7","c44:5","c45:8","c53:6","c57:5","c60:7","c61:6","c64:9","c71:1","c73:5","c77:3","c84:7","c87:2","c88:8"];
+var g41 = [];
+var g42 = [];
+var g43 = [];
+var g44 = [];
+var g45 = [];
+var g46 = [];
+var g47 = [];
+var g48 = [];
+var g49 = [];
+var g410 = [];
 
+// Load of game grids into their respective gameStore level -
+game0Store = [g00,g01,g02,g03,g04,g05,g06,g07,g08,g09,g010];
+game1Store = [g10,g11,g12,g13,g14,g15,g16,g17,g18,g19,g110];
+game2Store = [g20,g21,g22,g23,g24,g25,g26,g27,g28,g29,g210];
+game3Store = [g30,g31,g32,g33,g34,g35,g36,g37,g38,g39,g310];
+game4Store = [g40,g41,g42,g43,g44,g45,g46,g47,g48,g49,g410];
+
+// Finally, the source of all games for this demo -
 gameStore = [game0Store, game1Store, game2Store, game3Store, game4Store];
